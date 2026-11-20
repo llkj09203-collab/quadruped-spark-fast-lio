@@ -80,12 +80,45 @@ void Preprocess::process(const sensor_msgs::msg::PointCloud2 &msg, PointCloudXYZ
     case VELO16:
       velodyne_handler(msg);
       break;
+    case MID360:
+      mid360_handler(msg);
+      break;
 
     default:
       RCLCPP_FATAL(rclcpp::get_logger("Preprocess"), "Error LiDAR Type");
       break;
   }
   *pcl_out = pl_surf;
+}
+
+void Preprocess::mid360_handler(const sensor_msgs::msg::PointCloud2 &msg) {
+  pl_surf.clear();
+
+  pcl::PointCloud<livox_ros::Point> pl_orig;
+  pcl::fromROSMsg(msg, pl_orig);
+  if (pl_orig.empty()) return;
+
+  pl_surf.reserve(pl_orig.size() / point_filter_num + 1);
+  const double first_timestamp = pl_orig.front().timestamp;
+
+  for (size_t i = 0; i < pl_orig.size(); i += point_filter_num) {
+    const auto &src = pl_orig.points[i];
+    if (!std::isfinite(src.x) || !std::isfinite(src.y) || !std::isfinite(src.z)) continue;
+
+    const double range_sq = src.x * src.x + src.y * src.y + src.z * src.z;
+    if (range_sq < blind * blind) continue;
+
+    PointType dst;
+    dst.x = src.x;
+    dst.y = src.y;
+    dst.z = src.z;
+    dst.intensity = src.intensity;
+    dst.normal_x = dst.normal_y = dst.normal_z = 0.0f;
+    // The recorded PointCloud2 stores an absolute timestamp in nanoseconds.
+    // FAST-LIO uses milliseconds relative to the start of the scan.
+    dst.curvature = static_cast<float>(src.timestamp - first_timestamp) * 1.0e-6f;
+    pl_surf.push_back(dst);
+  }
 }
 
 bool Preprocess::is_from_pilot_zone(const float &pt_x,
