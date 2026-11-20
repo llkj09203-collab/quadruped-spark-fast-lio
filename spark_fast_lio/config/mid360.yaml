@@ -1,3 +1,5 @@
+# Added for the quadruped Livox Mid-360 integration by llkj09203-collab,
+# 2026-11-20. Distributed with the GPL v2 FAST-LIO package.
 /**:
   ros__parameters:
     preprocess:

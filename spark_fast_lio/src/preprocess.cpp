@@ -1,3 +1,5 @@
+// Modified for Livox Mid-360 PointCloud2 support by llkj09203-collab,
+// 2026-11-20. Original project and GPL v2 license are preserved in this repo.
 #include "preprocess.h"
 
 #define RETURN0 0x00

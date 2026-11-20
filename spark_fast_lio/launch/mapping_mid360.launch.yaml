@@ -1,3 +1,5 @@
+# Added for the quadruped Livox Mid-360 integration by llkj09203-collab,
+# 2026-11-20. Distributed with the GPL v2 FAST-LIO package.
 launch:
   - arg: {name: start_rviz, default: 'true'}
   - arg: {name: config_path, default: $(find-pkg-share spark_fast_lio)/config/mid360.yaml}
